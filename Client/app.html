@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Add some basic CSS styling */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('wallpaper.jpg');;
+            background-size: cover;
+        }
+
+        #header{
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 10%;
+            font-size: 150px;
+            font-weight: bold;
+            font-style: italic;
+            color: #8a2323;
+        }
+        #dropZoneContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px; /* Set a fixed height for the container */
+            border: 2px dashed #776f6f;
+            width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #dropZone {
+            padding: 20px;
+            cursor: pointer;
+        }
+        #dropZone p {
+            display: block; /* Initially display the text */
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 200px;
+            display: none;
+        }
+        #resultyes{
+            display: none;
+            color: rgba(255, 255, 255, 0.774);
+        }
+        #resultno{
+            display: none;
+            color: rgba(255, 255, 255, 0.774);
+        }
+    </style>
+</head>
+<body>
+    <h1 id="header">Is he the G.O.A.T?</h1>
+    <!-- Container for the centered drop box -->
+    <div id="dropZoneContainer">
+        <!-- Drag and drop box -->
+        <div id="dropZone">
+            <p style="font-size: 50px; color: #776f6f;"><b>Drop an image of a sportsman here to find out.</b></p>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        </div>
+
+        <!-- Image Preview -->
+        <img id="imagePreview" src="" alt="Image Preview">
+    </div>
+    <h1 id="resultyes">Absolutely!</h1>
+    <h1 id="resultno">Nope!</h1>
+
+
+    <!-- JavaScript code -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+            // Function to handle image upload and API request
+        function uploadImage(file) {
+            // Create a FormData object to send the image
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // Send a POST request to your API endpoint
+            $.ajax({
+                url: "http://127.0.0.1:5000/validate",
+                type: "POST",
+                data: formData,
+                contentType: false, // Set contentType to false when sending FormData
+                processData: false, // Set processData to false when sending FormData
+                success: function(response) {
+                    console.log("POST request successful!", response.result);
+                    if(response.result)
+                    {
+                        const element = document.getElementById("resultyes");
+                        element.style.display = 'block';
+                    }
+                    else
+                    {
+                        const element = document.getElementById("resultno");
+                        element.style.display = 'block';
+                    }
+                },
+                error: function(error) {
+                    console.error("Error making POST request:", error);
+                }
+            });
+        }
+
+
+        // Function to handle image preview and hide text
+        function previewImage(file) {
+            // Hide the text inside the drop box
+            const text = document.querySelector('#dropZone p');
+            text.style.display = 'none';
+
+            // Display the dropped image in the "imagePreview" element
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.src = URL.createObjectURL(file);
+            imagePreview.style.display = 'block';
+        }
+
+        // Add drag-and-drop functionality to the drop zone
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            dropZone.style.borderColor = 'blue';
+        });
+
+        dropZone.addEventListener('dragleave', function () {
+            dropZone.style.borderColor = '#ccc';
+        });
+
+        dropZone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            dropZone.style.borderColor = '#ccc';
+
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                previewImage(file);
+                uploadImage(file);
+            }
+        });
+        
+        // Add a change event listener to the file input
+        const input = document.getElementById('imageInput');
+        input.addEventListener('change', function () {
+            const file = input.files[0];
+            if (file) {
+                previewImage(file);
+            }
+        });
+    </script>
+</body>
+</html>
